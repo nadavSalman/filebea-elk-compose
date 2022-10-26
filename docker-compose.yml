@@ -6,7 +6,7 @@ services:
   # 'logstash_internal' and 'kibana_system' users inside Elasticsearch with the
   # values of the passwords defined in the '.env' file.
   #
-  # This task is only performed during the *initial* startup of the stack. On all
+  # This wup of the stack. On all
   # subsequent runs, the service simply returns immediately, without performing
   # any modification to existing users.
   setup:
@@ -87,6 +87,24 @@ services:
       - elk
     depends_on:
       - elasticsearch
+
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.4.3
+    user: root
+    volumes:
+      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      ELASTICSEARCH_HOSTS: "elasticsearch"
+      ELASTICSEARCH_USERNAME: "elastic"
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-}
+    depends_on:
+      - logstash
+    networks:
+      - elk
+
 
 networks:
   elk:
